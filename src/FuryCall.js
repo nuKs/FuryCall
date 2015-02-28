@@ -24,7 +24,46 @@
     FuryCall.resolveFn = resolveFn;
   };
 
+  FuryCall.createParser = function(tokens) {
+    var FuryCallParser = function(opts) {
+      FuryCall.call(this, opts);
+    };
+    FuryCallParser.prototype = Object.create(FuryCall.prototype);
+    FuryCallParser.prototype.constructor = FuryCallParser;
+    FuryCallParser.prototype._parseOptions = function(opts) {
+      opts = FuryCall.prototype._parseOptions.call(this, opts);
+
+      for (var i in opts) {
+        if (opts.hasOwnProperty(i) && tokens.hasOwnProperty(opts[i])) {
+          opts[i] = tokens[opts[i]].call(this);
+        }
+      }
+
+      return opts;
+    };
+
+    return FuryCallParser;
+  };
+
   FuryCall.prototype.exec = function(opts) {
+    opts = this._parseOptions(opts);
+
+    if (opts.$then === null && opts.$catch === null) {
+      return opts.fn.apply(opts.object, opts.args);
+    }
+    else if (typeof FuryCall.resolveFn === 'function') {
+      return FuryCall
+      .resolveFn(opts.fn.apply(opts.object, opts.args))
+      .then(opts.$then, opts.$catch);
+    }
+    else {
+      return opts.fn
+      .apply(opts.object, opts.args)
+      .then(opts.$then, opts.$catch);
+    }
+  };
+
+  FuryCall.prototype._parseOptions = function(opts) {
     opts = opts || {};
 
     var fn = (typeof opts.fn !== 'undefined') ? opts.fn : this._fn;
@@ -45,20 +84,13 @@
       }
     }
 
-    if ($then === null && $catch === null) {
-      return fn.apply(object, args);
-    }
-    else if (typeof FuryCall.resolveFn === 'function') {
-      return FuryCall
-      .resolveFn(fn.apply(object, args))
-      .then($then, $catch);
-    }
-    else {
-      return fn
-      .apply(object, args)
-      .then($then, $catch);
-    }
-
+    return {
+      fn: fn,
+      object: object,
+      args: args,
+      $then: $then,
+      $catch: $catch
+    };
   };
 
   if (typeof exports !== 'undefined') {

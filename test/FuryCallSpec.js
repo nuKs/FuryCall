@@ -43,7 +43,7 @@ describe("FuryCall", function() {
       expect(fn).toHaveBeenCalledWith('gracia', 34);
     });
 
-    it("should allow properties overriding", function() {
+    it("may override properties", function() {
       var fn = jasmine.createSpy('someFn');
       var someObj = {};
 
@@ -60,6 +60,19 @@ describe("FuryCall", function() {
 
       expect(fn.calls.mostRecent().object).not.toBe(someObj);
       expect(fn).toHaveBeenCalledWith('hehe');
+    });
+
+    xit("may override param", function() {
+
+      var call = new FuryCall({
+        object: someObj,
+        fn: fn,
+        args: ['gracia', 34]
+      });
+
+      call.exec(['overriding', 'args', ':/']);
+
+      // @todo test
     });
 
     it("should redefine callbacks", function() {
@@ -120,6 +133,14 @@ describe("FuryCall", function() {
       });
     });
 
+  });
+
+  xdescribe("#_parseOptions", function() {
+    // may be overriden
+  });
+
+  xdescribe("FuryCall.createParser", function() {
+    // @todo
   });
 
 });
