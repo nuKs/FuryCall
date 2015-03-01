@@ -1,7 +1,7 @@
 describe("FuryCall", function() {
 
   beforeEach(function() {
-    FuryCall.setResolveFn(when.resolve.bind(when));
+    FuryCall.setPromiseFn(when.promise.bind(when));
   });
 
   describe("constructor", function() {
