@@ -18,10 +18,10 @@
       }
     }
   }
-  FuryCall.resolveFn = null;
+  FuryCall._promiseFn = null;
 
-  FuryCall.setResolveFn = function(resolveFn) {
-    FuryCall.resolveFn = resolveFn;
+  FuryCall.setPromiseFn = function(promiseFn) {
+    FuryCall._promiseFn = promiseFn;
   };
 
   FuryCall.createParser = function(tokens) {
@@ -47,13 +47,14 @@
 
   FuryCall.prototype.exec = function(opts) {
     opts = this._parseOptions(opts);
-
     if (opts.$then === null && opts.$catch === null) {
       return opts.fn.apply(opts.object, opts.args);
     }
-    else if (typeof FuryCall.resolveFn === 'function') {
+    else if (typeof FuryCall._promiseFn === 'function') {
       return FuryCall
-      .resolveFn(opts.fn.apply(opts.object, opts.args))
+      ._promiseFn(function(resolve, reject) {
+        resolve(opts.fn.apply(opts.object, opts.args));
+      })
       .then(opts.$then, opts.$catch);
     }
     else {
